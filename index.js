@@ -25,8 +25,21 @@ server.post('/api/register', (req,res) => {
 })
 
 server.post('/api/login', (req,res) => {
-    const user = req.body
+    const userData = req.body
 
+    User.login(userData)
+    .then(user => {
+        if (bcrypt.compareSync(userData.password, user.password)) {
+            res.status(200).json({ message: 'User is valid'})
+        } else {
+            res.status(400).json({ message: 'username or password wrong'})
+        }
+    })
+    .catch(err => {
+        console.log(err)
+
+        res.status(500).json({ errorMessage: 'Something bad happened at Login'})
+    })
 })
 
 server.get('/api/users', (req,res) => {
