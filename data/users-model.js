@@ -3,7 +3,8 @@ const db = knex(require('../knexfile').development)
 
 module.exports = {
     register,
-    login
+    login,
+    users
 }
 
 function register(user) {

@@ -5,6 +5,7 @@ const User = require('./data/users-model')
 const session = require('express-session');
 const KnexStore = require('connect-session-knex')(session)
 const knex = require("./data/dbConfig.js");
+const restricted = require('./middleware/restricted-middleware')
 
 const server = express()
 
@@ -58,10 +59,18 @@ server.post('/api/login', (req,res) => {
 
     User.login(userData)
     .then(user => {
-        if (bcrypt.compareSync(userData.password, user.password)) {
-            res.status(200).json({ message: 'User is valid'})
+        // if (bcrypt.compareSync(userData.password, user.password)) {
+        //     res.status(200).json({ message: 'User is valid'})
+        // } else {
+        //     res.status(400).json({ message: 'username or password wrong'})
+        // }
+        if(user && bcrypt.compareSync(userData.password, user.password)) {
+            req.session.loggedIn = true;
+            req.session.username = userData.username
+
+            res.status(200).json({ message: `Welcome ${userData.username}`})
         } else {
-            res.status(400).json({ message: 'username or password wrong'})
+            res.status(401).json({ message: 'username or password wrong'})
         }
     })
     .catch(err => {
@@ -71,8 +80,8 @@ server.post('/api/login', (req,res) => {
     })
 })
 
-server.get('/api/users', (req,res) => {
-    Users.users()
+server.get('/api/users', restricted, (req,res) => {
+    User.users()
     .then(users => {
         res.status(200).json(users)
     })
