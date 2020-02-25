@@ -17,3 +17,8 @@ function login(user){
     .where({username: user.username})
     .first()
 }
+
+function users(){
+    return db('users')
+    .select('*')
+}
